@@ -1,0 +1,35 @@
+{
+    "name": "SpaceX ISS Docking Simulator Flight Assistant",
+    "version": "1.0",
+    "manifest_version" : 2,
+    "description": "Dock in fully automatic or semi-automatic mode",
+    "browser_action": {
+        "default_icon": "icon16.png"
+    },
+    "icons": {
+        "128": "icon128.png",
+        "256": "icon256.png",
+        "64": "icon64.png",
+        "16": "icon16.png"
+    },
+
+    "background": {
+        "persistent": false,
+        "scripts": ["background.js"]
+    },
+
+    "permissions": [
+        "tabs", "contentSettings"
+    ],
+
+    "web_accessible_resources": [
+        "autopilot.js"
+    ],
+    "content_scripts": [
+        {
+            "run_at" :"document_end",
+            "matches": ["http://iss-sim.spacex.com/*", "https://iss-sim.spacex.com/*" ],
+            "js": ["script.js"]
+        }
+    ]
+}

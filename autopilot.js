@@ -312,6 +312,7 @@ class Autopilot{
     }
 }
 
+
 let ap = new Autopilot();;
 
 document.onkeyup = ev=>{
