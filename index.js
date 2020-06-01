@@ -129,10 +129,11 @@ class Assistant {
 
     run() {
         let self = this
+        if(this.enabled) return //already running
+        this.enabled = true;
         if (this.functionIncrease === null || this.functionDecrease === null || this.getInput === null)
             throw new Error("Assistant is not initialized")
         this.lastTime = new Date()
-        this.enabled = true;
 
         let runOnce = function(){
             let input = self.getInput()
@@ -215,10 +216,12 @@ function preparePitchAssistant(){
 
 function prepareXAssistant(){
     let res = new Assistant();
-    res.setInputGetter(window.get);
-    res.setFunctionIncrease(window.translateBackward);
-    res.setFunctionDecrease(window.translateForward);
+    res.setInputGetter(getX);
+    res.setFunctionIncrease(window.translateForward);
+    res.setFunctionDecrease(window.translateBackward);
     res.dc = 100
+    res.pc = 10
+    res.tv = 0.2
     return res;
 }
 function prepareYAssistant(){
@@ -238,10 +241,58 @@ function prepareZAssistant(){
     return res;
 }
 
-roll = prepareRollAssistant();
-pitch = preparePitchAssistant();
-yaw = prepareYawAssistant()
+class Autopilot{
+    constructor(){
+        this.roll = prepareRollAssistant();
+        this.pitch = preparePitchAssistant();
+        this.yaw = prepareYawAssistant()
+        this.x = prepareXAssistant()
+        this.y = prepareYAssistant()
+        this.z = prepareZAssistant()
+        this.enabled = false
+    }
 
-x = prepareXAssistant()
-y = prepareYAssistant()
-z = prepareZAssistant()
+    toggle(){
+        this.enabled ? this.disable() : this.enable()
+    }
+
+    disable(params){
+
+        let { roll=true, pitch=true, yaw=true, x=true, y=true, z=true } = params
+        if (this.enabled) this.enabled = false;
+        if (roll) this.roll.stop()
+        if (pitch) this.pitch.stop()
+        if (yaw) this.yaw.stop()
+        if (x) this.x.stop()
+        if (t) this.y.stop()
+        if (z) this.z.stop()
+    }
+
+    enable(params){
+        let { roll=true, pitch=true, yaw=true, x=true, y=true, z=true } = params
+        this.enable = true
+        if (roll) this.roll.run()
+        if (pitch) this.pitch.run()
+        if (yaw) this.yaw.run()
+        if (x) this.x.run()
+        if (t) this.y.run()
+        if (z) this.z.run()
+    }
+
+
+}
+
+let ap = new Autopilot();
+
+
+document.onkeyup(ev=>{
+    if(ev.keycode === 69){
+        ap.enable()
+
+    }
+
+    if(ev.keycode === 68){
+        ap.disable()
+
+    }
+})
