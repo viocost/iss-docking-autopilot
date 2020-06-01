@@ -58,9 +58,29 @@ function getRoll() {
     return parseFloat(raw.substring(0, raw.length - 1))
 }
 
+
+function getX(){
+
+    let raw = document.getElementById("x-range").innerText
+    return parseFloat(raw.substring(0, raw.length - 1))
+}
+
+
+function getY(){
+
+    let raw = document.getElementById("y-range").innerText
+    return parseFloat(raw.substring(0, raw.length - 1))
+}
+
+function getZ(){
+
+    let raw = document.getElementById("z-range").innerText
+    return parseFloat(raw.substring(0, raw.length - 1))
+}
+
 class Assistant {
     constructor(param = {}) {
-        let { pc = 5, ic = 0, dc, tv = 0, functionIncrease = null, functionDecrease = null, interval = 100 } = param;
+        let { pc = 5, ic = 0, dc = 0, tv = 0, functionIncrease = null, functionDecrease = null, interval = 100 } = param;
         this.enabled = false;
         this.pc = pc; //Proportional coefficient
         this.ic = ic; //Integral coefficient
@@ -85,10 +105,6 @@ class Assistant {
 
             set: function(target, prop, value) {
                 if (!(prop in target)) throw new ReferenceError(`prop does not exist`)
-                if ((prop === "functionIncrease" || prop === "functionDecrease" || prop === "getInput") && !(value instanceof Function))
-                    throw new TypeError(`Property ${prop} must be a function`)
-                else if (prop === "enabled") return Reflect.set(...arguments)
-                else if (typeof value !== "number") throw new TypeError(`Property ${prop} must be a number`)
                 return Reflect.set(...arguments)
             }
         })
@@ -100,29 +116,41 @@ class Assistant {
         let deltaTime = (now - this.lastTime) * .001; //in seconds
         let error = this.tv - input;
 
-        this.errorSum += (erro * deltaTime)
+        this.errorSum += (error * deltaTime)
         let dErr = (error - this.lastError) / deltaTime;
 
         this.lastError = error
         this.lastTime = now
 
-        return this.pc * error + this.ic * this.errorSum + dc * dErr;
+        console.log(`pc: ${this.pc}, ic ${this.ic}, dc: ${this.dc}, error: ${error}, dErr: ${dErr}, deltaTime: ${deltaTime}`);
+        return this.pc * error + this.ic * this.errorSum + this.dc * dErr;
     }
 
 
     run() {
+        let self = this
         if (this.functionIncrease === null || this.functionDecrease === null || this.getInput === null)
             throw new Error("Assistant is not initialized")
         this.lastTime = new Date()
+        this.enabled = true;
 
         let runOnce = function(){
-            let output = this.compute(this.getInput())
-            for (let i=0; i<this.normalizeOutput(Math.floor(Math.abs(output))); ++i ){
-                output < 0 ? this.functionIncrease() : this.functionDecrease();
+            let input = self.getInput()
+            console.log(`Input: ${input}`);
+            let output = self.compute(input)
+            console.log(`Output: ${output}`);
+            for (let i=0; i<self.normalizeOutput(Math.floor(Math.abs(output))); ++i ){
+                output < 0 ? self.functionIncrease() : self.functionDecrease();
             }
 
-            if(this.enabled) setTimeout(runOnce, this.interval);
+            if(self.enabled) setTimeout(runOnce, self.interval);
         }
+
+        runOnce()
+    }
+
+    stop(){
+        this.enabled = false;
     }
 
 
@@ -146,9 +174,74 @@ class Assistant {
         this.functionIncrease = fn
     }
 
+    setFunctionDecrease(fn) {
+        this.functionDecrease = fn
+    }
+
     setInputGetter(fn){
         this.getInput = fn;
     }
-
-
 }
+
+
+
+function prepareRollAssistant(){
+    let res = new Assistant();
+    res.setInputGetter(window.getRoll);
+    res.setFunctionIncrease(window.rollRight);
+    res.setFunctionDecrease(window.rollLeft);
+    res.dc = 100
+    return res;
+}
+
+
+function prepareYawAssistant(){
+    let res = new Assistant();
+    res.setInputGetter(getYaw);
+    res.setFunctionIncrease(window.yawRight);
+    res.setFunctionDecrease(window.yawLeft);
+    res.dc = 100
+    return res;
+}
+function preparePitchAssistant(){
+    let res = new Assistant();
+    res.setInputGetter(getPitch);
+    res.setFunctionIncrease(window.pitchDown);
+    res.setFunctionDecrease(window.pitchUp);
+    res.dc = 100
+    return res;
+}
+
+
+function prepareXAssistant(){
+    let res = new Assistant();
+    res.setInputGetter(window.get);
+    res.setFunctionIncrease(window.translateBackward);
+    res.setFunctionDecrease(window.translateForward);
+    res.dc = 100
+    return res;
+}
+function prepareYAssistant(){
+    let res = new Assistant();
+    res.setInputGetter(getY);
+    res.setFunctionIncrease(window.translateLeft);
+    res.setFunctionDecrease(window.translateRight);
+    res.dc = 100
+    return res;
+}
+function prepareZAssistant(){
+    let res = new Assistant();
+    res.setInputGetter(getZ);
+    res.setFunctionIncrease(window.translateDown);
+    res.setFunctionDecrease(window.translateUp);
+    res.dc = 100
+    return res;
+}
+
+roll = prepareRollAssistant();
+pitch = preparePitchAssistant();
+yaw = prepareYawAssistant()
+
+x = prepareXAssistant()
+y = prepareYAssistant()
+z = prepareZAssistant()
