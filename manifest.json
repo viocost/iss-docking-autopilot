@@ -1,6 +1,6 @@
 {
     "name": "SpaceX ISS Docking Simulator Flight Assistant",
-    "version": "1.0",
+    "version": "1.2",
     "manifest_version" : 2,
     "description": "Dock in fully automatic or semi-automatic mode",
     "icons": {
@@ -21,10 +21,6 @@
         "default_icon": "icon16.png",
         "default_popup": "help.html"
     },
-
-    "permissions": [
-        "tabs", "contentSettings"
-    ],
 
     "web_accessible_resources": [
         "autopilot.js"

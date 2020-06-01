@@ -264,7 +264,7 @@ class Autopilot{
             this.x.dc = 800
         }
 
-        if (enabled) setTimeout(this.checkApproach, 1000);
+        if (this.enabled) setTimeout(this.checkApproach, 1000);
 
     }
 
