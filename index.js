@@ -219,7 +219,7 @@ function prepareXAssistant(){
     res.setInputGetter(getX);
     res.setFunctionIncrease(window.translateForward);
     res.setFunctionDecrease(window.translateBackward);
-    res.dc = 100
+    res.dc = 130
     res.pc = 10
     res.tv = 0.2
     return res;
@@ -230,6 +230,7 @@ function prepareYAssistant(){
     res.setFunctionIncrease(window.translateLeft);
     res.setFunctionDecrease(window.translateRight);
     res.dc = 100
+    res.tv = 0.1
     return res;
 }
 function prepareZAssistant(){
@@ -238,6 +239,7 @@ function prepareZAssistant(){
     res.setFunctionIncrease(window.translateDown);
     res.setFunctionDecrease(window.translateUp);
     res.dc = 100
+    res.tv = 0.1
     return res;
 }
 
@@ -252,11 +254,22 @@ class Autopilot{
         this.enabled = false
     }
 
+    checkApproach(){
+
+        if(getX() < 3){
+            console.log("Approach mode");
+            this.x.dc = 800
+        }
+
+        if (enabled) setTimeout(this.checkApproach, 1000);
+
+    }
+
     toggle(){
         this.enabled ? this.disable() : this.enable()
     }
 
-    disable(params){
+    disable(params = {}){
 
         let { roll=true, pitch=true, yaw=true, x=true, y=true, z=true } = params
         if (this.enabled) this.enabled = false;
@@ -264,35 +277,36 @@ class Autopilot{
         if (pitch) this.pitch.stop()
         if (yaw) this.yaw.stop()
         if (x) this.x.stop()
-        if (t) this.y.stop()
+        if (y) this.y.stop()
         if (z) this.z.stop()
     }
 
-    enable(params){
+    enable(params = {}){
         let { roll=true, pitch=true, yaw=true, x=true, y=true, z=true } = params
-        this.enable = true
+        this.enabled = true
         if (roll) this.roll.run()
         if (pitch) this.pitch.run()
         if (yaw) this.yaw.run()
         if (x) this.x.run()
-        if (t) this.y.run()
+        if (y) this.y.run()
         if (z) this.z.run()
+        this.checkApproach()
+       
     }
-
-
 }
 
-let ap = new Autopilot();
 
 
-document.onkeyup(ev=>{
-    if(ev.keycode === 69){
+document.onkeyup = ev=>{
+    if(ev.keyCode === 69){
+
+        ap = new Autopilot();
         ap.enable()
 
     }
 
-    if(ev.keycode === 68){
+    if(ev.keyCode === 68){
         ap.disable()
 
     }
-})
+}
