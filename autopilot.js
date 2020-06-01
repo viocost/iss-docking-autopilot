@@ -154,6 +154,9 @@ class Assistant {
         this.enabled = false;
     }
 
+    toggle(){
+        this.enabled ? this.stop() : this.run();
+    }
 
     normalizeOutput(val){
         return val > this.maxOutVal ? this.maxOutVal : val
@@ -265,9 +268,6 @@ class Autopilot{
 
     }
 
-    toggle(){
-        this.enabled ? this.disable() : this.enable()
-    }
 
     disable(params = {}){
 
@@ -291,22 +291,57 @@ class Autopilot{
         if (y) this.y.run()
         if (z) this.z.run()
         this.checkApproach()
-       
+    }
+
+    toggle(assistant){
+        let assistants = {
+            x: this.x,
+            y: this.y,
+            z: this.z,
+            roll: this.roll,
+            pitch: this.pitch,
+            yaw: this.yaw
+        }
+
+        if(assistant in assistants){
+            assistants[assistant].toggle();
+        } else{
+            console.log("Assistant does not exist");
+        }
+
     }
 }
 
-
+let ap = new Autopilot();;
 
 document.onkeyup = ev=>{
-    if(ev.keyCode === 69){
+    switch(ev.keyCode){
+        case 70:
+            if(ap.enabled){
+                ap.disable()
+            } else {
+                ap = new Autopilot();
+                ap.enable()
+            }
+            break;
+        case 89:
+            if (ev.shiftKey)
+                ap.toggle("yaw")
+            else
+                ap.toggle("y")
+            break;
 
-        ap = new Autopilot();
-        ap.enable()
-
-    }
-
-    if(ev.keyCode === 68){
-        ap.disable()
-
+        case 90:
+            ap.toggle("z")
+            break;
+        case 88:
+            ap.toggle("x")
+            break;
+        case 80:
+            ap.toggle("pitch")
+            break;
+        case 82:
+            ap.toggle("roll")
+            break;
     }
 }
